@@ -1,5 +1,115 @@
 # Changelog
 
+## 2.1.131
+
+- Fixed VS Code extension failing to activate on Windows due to a hardcoded build path in the bundled SDK (`createRequire` polyfill bug)
+- Fixed Mantle endpoint authentication failing with missing `x-api-key` header
+
+## 2.1.129
+
+- Added `--plugin-url <url>` flag to fetch a plugin `.zip` archive from a URL for the current session
+- Added `CLAUDE_CODE_FORCE_SYNC_OUTPUT=1` env var to force-enable synchronized output on terminals that auto-detection misses (e.g. Emacs `eat`)
+- Added `CLAUDE_CODE_PACKAGE_MANAGER_AUTO_UPDATE`: when set on Homebrew or WinGet installations, Claude Code runs the upgrade command in the background and prompts to restart
+- Plugin manifests: `themes` and `monitors` should now be declared under `"experimental": { ... }`. Top-level declarations still work but `claude plugin validate` will warn
+- Gateway `/v1/models` discovery for the `/model` picker is now opt-in via `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` (was automatic in 2.1.126–2.1.128)
+- Ctrl+R history picker now defaults to searching all prompts across all projects, matching pre-2.1.124 behavior. Press Ctrl+S to narrow to the current project or session
+- Third-party deployments (Bedrock, Vertex, Foundry, or `ANTHROPIC_BASE_URL` gateway) no longer see spinner tips pointing at first-party Anthropic surfaces
+- `skillOverrides` setting now works: `off` hides from model and `/`, `user-invocable-only` hides from model only, `name-only` collapses description
+- The `claude_code.pull_request.count` OTel metric now counts PRs/MRs created via MCP tools, not just shell commands
+- Policy refusal error messages now include the API Request ID for easier support debugging
+- Fixed API errors with unrecognized 400 status codes showing raw JSON instead of the underlying error message
+- Fixed `/clear` not resetting the terminal tab title after a conversation
+- Fixed session title chip from `/rename` disappearing while a permission or other dialog is active
+- Fixed agent panel below the prompt being hidden when subagents are running (regression in 2.1.122)
+- Fixed external-editor handoff (Ctrl+G) blanking the conversation history above the prompt
+- Fixed `/context` dumping its rendered ASCII visualization grid into the conversation, wasting ~1.6k tokens per call
+- Fixed `/agents` Library list arrow-key navigation: the highlighted agent now stays visible when the list exceeds the viewport
+- Fixed `/branch` success message not including the new branch's session id for `/resume`
+- Fixed bold headers with keycap/ZWJ/skin-tone emoji losing trailing characters in fullscreen mode
+- Fixed server-managed settings policy not applying for enterprise/team users whose stored OAuth credentials lacked the `user:inference` scope
+- Fixed OAuth refresh race after wake-from-sleep that could log out all running sessions
+- Fixed 1-hour prompt cache TTL being silently downgraded to 5 minutes
+- Fixed cache-miss warning appearing spuriously after `/clear` or compaction when changing `/effort` or `/model`
+- Fixed `Bash(mkdir *)`, `Bash(touch *)` and similar allow rules not being honored for in-project paths
+- Fixed `deniedMcpServers` patterns with a `*://` scheme wildcard not matching mixed-case hostnames
+- Fixed harmless WebSocket warning being logged as an error in `--debug` during voice mode
+- [VSCode] Fixed `/clear` not clearing the conversation context and displayed transcript
+
+## 2.1.128
+
+- Bare `/color` (no args) now picks a random session color
+- `/mcp` now shows the tool count for connected servers and flags servers that connected with 0 tools
+- `--plugin-dir` now accepts `.zip` plugin archives in addition to directories
+- `--channels` now works with console (API key) authentication — console orgs with managed settings must set `channelsEnabled: true` to enable
+- Updated `/model` picker: collapsed duplicate Opus 4.7 entries, and current Opus now shows as "Opus" instead of "Opus 4.7"
+- Subprocesses (Bash, hooks, MCP, LSP) no longer inherit `OTEL_*` environment variables, so OTEL-instrumented apps run via the Bash tool no longer pick up the CLI's own OTLP endpoint
+- MCP: `workspace` is now a reserved server name — existing servers with that name will be skipped with a warning
+- Reconnecting MCP servers no longer flood the conversation with full tool-name lists on every reconnect — re-announced tools are summarized by server prefix
+- SDK hosts now receive a persistent `localSettings` suggestion for Bash permission prompts, so "Always allow" writes to `.claude/settings.local.json`
+- `EnterWorktree` now creates the new branch from local HEAD as documented, instead of `origin/<default-branch>` — unpushed commits are no longer dropped
+- Auto mode: when the classifier can't evaluate an action, the error now includes a hint (retry, `/compact`, or run with `--debug`)
+- Fixed focus mode briefly dimming the previous response when submitting a new prompt
+- Fixed stray "4;0;" desktop notification on every `/exit` in Kitty and other terminals that interpret OSC 9 as a notification
+- Fixed Remote Control showing an empty "Opening your options…" message on rate limit instead of actionable upsell options
+- Fixed drag-and-drop image upload hanging on "Pasting text…" when the image read fails
+- Fixed crash loop when piping very large input (>10 MB) to `claude -p` via stdin
+- Fixed long URLs not being individually clickable on every wrapped row in fullscreen mode
+- Fixed `/plugin` Components panel showing "Marketplace 'inline' not found" for plugins loaded via `--plugin-dir`
+- Fixed MCP tool results dropping images when the server returns both structured content and content blocks
+- Fixed fenced code blocks inside list items carrying leading whitespace into the clipboard on copy-paste
+- Fixed tab navigation in `/config` stranding focus — the tab header now stays focused so arrows and Esc keep working
+- Fixed markdown link labels being lost on terminals without OSC 8 hyperlink support — links now render as `label (url)` instead of just the URL
+- Fixed sessions on 1M-context models with a smaller autocompact window being falsely blocked with "Prompt is too long" before reaching the actual API limit
+- Fixed parallel shell tool calls: a failing read-only command (grep, git diff, ls) no longer cancels sibling calls
+- Fixed banner showing "with X effort" on models that don't support effort
+- Fixed `/fast` on 3P providers fuzzy-matching to an unrelated skill instead of showing "not available"
+- Fixed Bedrock default model resolving to `global.*` instead of the region-appropriate prefix
+- Fixed vim mode: `Space` in NORMAL mode now moves the cursor right, matching standard vi/vim behavior
+- Fixed terminal progress indicator (OSC 9;4) flickering off between tool calls — stays visible across the full turn
+- Fixed `/rename` without args failing on resumed sessions whose last entry is a compact boundary
+- Fixed stale "remote-control is active" status lines from prior sessions appearing after `--resume`/`--continue`
+- Fixed stale `installed_plugins.json` entries pointing at deleted cache directories polluting PATH
+- Fixed MCP stdio servers receiving corrupted arguments when `CLAUDE_CODE_SHELL_PREFIX` is set and an argument contains spaces or shell metacharacters
+- Fixed sub-agent progress summaries missing the prompt cache (~3× `cache_creation` reduction)
+- Fixed `/plugin update` never detecting new versions of npm-sourced plugins
+- Fixed sub-agent summaries firing repeatedly while a sub-agent's transcript is static, capping worst-case token cost on idle sub-agents
+- Headless `--output-format stream-json`: `init.plugin_errors` now includes `--plugin-dir` load failures in addition to dependency demotions
+
+## 2.1.126
+
+- The `/model` picker now lists models from your gateway's `/v1/models` endpoint when `ANTHROPIC_BASE_URL` points at an Anthropic-compatible gateway
+- - Added `claude project purge [path]` to delete all Claude Code state for a project (transcripts, tasks, file history, config entry) — supports `--dry-run`, `-y/--yes`, `-i/--interactive`, and `--all`
+- `--dangerously-skip-permissions` now bypasses prompts for writes to `.claude/`, `.git/`, `.vscode/`, shell config files, and other previously-protected paths (catastrophic removal commands still prompt as a safety net)
+- `claude auth login` now accepts the OAuth code pasted into the terminal when the browser callback can't reach localhost (WSL2, SSH, containers)
+- `claude_code.skill_activated` OpenTelemetry event now fires for user-typed slash commands and carries a new `invocation_trigger` attribute (`"user-slash"`, `"claude-proactive"`, or `"nested-skill"`)
+- Auto mode: the spinner now turns red when a permission check stalls, instead of looking like the tool is running
+- Host-managed deployments (`CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST`) no longer auto-disable analytics on Bedrock/Vertex/Foundry
+- Windows: PowerShell 7 installed via the Microsoft Store, MSI without PATH, or `.NET global tool` is now detected
+- Windows: when the PowerShell tool is enabled, Claude now treats PowerShell as the primary shell instead of defaulting to Bash
+- Read tool: removed the per-file malware-assessment reminder that could cause spurious refusals and "this is not malware" commentary on legacy models
+- **Security:** Fixed `allowManagedDomainsOnly` / `allowManagedReadPathsOnly` being ignored when a higher-priority managed-settings source lacked a `sandbox` block
+- Fixed pasting an image larger than 2000px breaking the session — images are now downscaled on paste, and oversized images in history are automatically removed and the request retried
+- Fixed showing the login screen for "OAuth not allowed for organization" errors — now shows guidance to contact your admin
+- Fixed OAuth login failing with timeout on slow or proxied connections, in IPv6-only devcontainers, and when the browser callback can't reach localhost
+- Fixed a rare race where a concurrent credential write could clear a valid OAuth refresh token
+- Fixed API retry countdown sticking at "0s" instead of counting down between attempts
+- Fixed "Stream idle timeout" error after waking Mac from sleep mid-request
+- Fixed background and remote sessions falsely aborting with "Stream idle timeout" during long model thinking pauses
+- Fixed a hang where the assistant could finish thinking but show no output after a run of empty turns
+- Fixed overly fast trackpad scrolling in Cursor and VS Code 1.92–1.104 integrated terminals
+- Fixed claude.ai MCP connectors being suppressed by manual servers stuck in needs-auth state
+- Fixed Japanese/Korean/Chinese text rendering as garbled characters on Windows in no-flicker mode
+- Fixed `Ctrl+L` clearing the prompt input — it now only forces a screen redraw, matching readline behavior
+- Fixed deferred tools (WebSearch, WebFetch, etc.) not being available to skills with `context: fork` and other subagents on their first turn
+- Fixed plan-mode tools being unavailable in interactive sessions launched with `--channels`
+- Fixed `/plugin` Uninstall reporting "Enabled" instead of "Uninstalled"
+- Bounded total size of file-modified reminders when a linter touches many files at once
+- Fixed `/remote-control` retries appearing stuck on "connecting…" — each retry now shows its result
+- Fixed Remote Control failure notification not showing the error reason for initial connection failures
+- Windows: clipboard writes no longer expose copied content in process command-line arguments visible to EDR/SIEM telemetry; also fixes >22KB selections not reaching the clipboard
+- PowerShell tool: bare `--` (e.g. `git diff -- file`) is no longer mis-flagged as the `--%` stop-parsing token
+- Fixed Agent SDK hang when the model emits a malformed tool name in a parallel tool call batch
+
 ## 2.1.123
 
 - Fixed OAuth authentication failing with a 401 retry loop when `CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1` is set
