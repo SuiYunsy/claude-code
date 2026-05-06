@@ -89,54 +89,38 @@ if (typeof globalThis.Bun === "undefined") {
       return bunHash(data, seed);
     },
 
-    stripANSI: (str) => typeof str === "string" ? str.replace(ANSI_RE, "") : str,
+    stripANSI: (str) => {
+      try { return require("strip-ansi")(str); }
+      catch { return typeof str === "string" ? str.replace(ANSI_RE, "") : str; }
+    },
 
     stringWidth: (str, opts) => {
-      // Simplified: count visible characters (exclude ANSI, handle wide chars)
-      if (!str) return 0;
-      const stripped = str.replace(ANSI_RE, "");
-      let width = 0;
-      for (const ch of stripped) {
-        const code = ch.codePointAt(0);
-        // CJK Unified Ideographs, CJK Compatibility, Fullwidth forms
-        if ((code >= 0x1100 && code <= 0x115F) || (code >= 0x2E80 && code <= 0x303E) ||
-            (code >= 0x3040 && code <= 0x33BF) || (code >= 0xF900 && code <= 0xFAFF) ||
-            (code >= 0xFE30 && code <= 0xFE6F) || (code >= 0xFF01 && code <= 0xFF60) ||
-            (code >= 0xFFE0 && code <= 0xFFE6) || (code >= 0x20000 && code <= 0x2FFFD) ||
-            (code >= 0x30000 && code <= 0x3FFFD)) {
-          width += 2;
-        } else if (code >= 0x20) {
-          width += 1;
-        }
+      try { return require("string-width")(str); }
+      catch {
+        if (!str) return 0;
+        return str.replace(ANSI_RE, "").length;
       }
-      return width;
     },
 
     wrapAnsi: (str, cols, opts) => {
-      // Simplified line wrapper
-      if (!str || cols <= 0) return str;
-      const lines = str.split("\n");
-      const result = [];
-      for (const line of lines) {
-        if (line.length <= cols) { result.push(line); continue; }
-        let cur = "";
-        for (const ch of line) {
-          if (cur.length >= cols) { result.push(cur); cur = ""; }
-          cur += ch;
-        }
-        if (cur) result.push(cur);
+      try { return require("wrap-ansi")(str, cols, opts); }
+      catch {
+        if (!str || cols <= 0) return str;
+        return str;
       }
-      return result.join("\n");
     },
 
     semver: {
       order: (a, b) => {
-        const pa = a.split(".").map(Number), pb = b.split(".").map(Number);
-        for (let i = 0; i < 3; i++) {
-          if ((pa[i] || 0) > (pb[i] || 0)) return 1;
-          if ((pa[i] || 0) < (pb[i] || 0)) return -1;
+        try { return require("semver").compare(a, b); }
+        catch {
+          const pa = a.split(".").map(Number), pb = b.split(".").map(Number);
+          for (let i = 0; i < 3; i++) {
+            if ((pa[i] || 0) > (pb[i] || 0)) return 1;
+            if ((pa[i] || 0) < (pb[i] || 0)) return -1;
+          }
+          return 0;
         }
-        return 0;
       },
       satisfies: (version, range) => {
         try { return require("semver").satisfies(version, range); }

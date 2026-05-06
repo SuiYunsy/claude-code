@@ -42,6 +42,10 @@ export async function buildMainPackage({
       ws: '^8.18.0',
       yaml: '^2.7.0',
       undici: '^7.3.0',
+      semver: '^7.6.3',
+      'strip-ansi': '^6.0.1',
+      'string-width': '^4.2.3',
+      'wrap-ansi': '^7.0.0',
     },
     optionalDependencies: {
       ...optDeps,
