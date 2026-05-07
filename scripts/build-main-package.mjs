@@ -43,9 +43,6 @@ export async function buildMainPackage({
       yaml: '^2.7.0',
       undici: '^7.3.0',
       semver: '^7.6.3',
-      'strip-ansi': '^6.0.1',
-      'string-width': '^4.2.3',
-      'wrap-ansi': '^7.0.0',
     },
     optionalDependencies: {
       ...optDeps,
@@ -62,6 +59,7 @@ export async function buildMainPackage({
     files: [
       'cli.js',
       'install.cjs',
+      'bun-ink-compat.cjs',
       'sdk-tools.d.ts',
     ],
   };
@@ -74,7 +72,12 @@ export async function buildMainPackage({
   await writeFile(join(outputDir, 'install.cjs'), installTemplate);
   console.log('[OK] install.cjs');
 
-  // 3. cli.js placeholder
+  // 3. bun-ink-compat.cjs (compiled ANSI/width/wrap from Anthropic source)
+  const inkCompat = readFileSync(join(__dirname, '..', 'templates', 'bun-ink-compat.cjs'));
+  await writeFile(join(outputDir, 'bun-ink-compat.cjs'), inkCompat);
+  console.log('[OK] bun-ink-compat.cjs');
+
+  // 4. cli.js placeholder
   const placeholder = readFileSync(join(__dirname, '..', 'templates', 'cli-placeholder.js'), 'utf8');
   await writeFile(join(outputDir, 'cli.js'), placeholder);
   console.log('[OK] cli.js (placeholder)');

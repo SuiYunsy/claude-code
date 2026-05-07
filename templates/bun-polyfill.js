@@ -78,7 +78,11 @@ if (typeof globalThis.Bun === "undefined") {
   }
   bunHash.toString = () => "function hash() { [native code] }";
 
-  // ANSI escape regex
+  // Load Anthropic-compatible ink implementations (bundled from source)
+  let _inkCompat = null;
+  try { _inkCompat = require("./bun-ink-compat.cjs"); } catch {}
+
+  // ANSI escape regex (fallback if compat module unavailable)
   const ANSI_RE = /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
 
   globalThis.Bun = {
@@ -90,24 +94,20 @@ if (typeof globalThis.Bun === "undefined") {
     },
 
     stripANSI: (str) => {
-      try { return require("strip-ansi")(str); }
-      catch { return typeof str === "string" ? str.replace(ANSI_RE, "") : str; }
+      if (_inkCompat?.stripANSI) return _inkCompat.stripANSI(str);
+      return typeof str === "string" ? str.replace(ANSI_RE, "") : str;
     },
 
     stringWidth: (str, opts) => {
-      try { return require("string-width")(str); }
-      catch {
-        if (!str) return 0;
-        return str.replace(ANSI_RE, "").length;
-      }
+      if (_inkCompat?.stringWidth) return _inkCompat.stringWidth(str);
+      if (!str) return 0;
+      return str.replace(ANSI_RE, "").length;
     },
 
     wrapAnsi: (str, cols, opts) => {
-      try { return require("wrap-ansi")(str, cols, opts); }
-      catch {
-        if (!str || cols <= 0) return str;
-        return str;
-      }
+      if (_inkCompat?.wrapAnsi) return _inkCompat.wrapAnsi(str, cols, opts);
+      if (!str || cols <= 0) return str;
+      return str;
     },
 
     semver: {
