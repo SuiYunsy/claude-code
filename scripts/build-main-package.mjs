@@ -43,10 +43,10 @@ export async function buildMainPackage({
       yaml: '^2.7.0',
       undici: '^7.3.0',
       semver: '^7.6.3',
+      'node-pty': '^1.1.0',
     },
     optionalDependencies: {
       ...optDeps,
-      'node-pty': '^1.1.0',
       '@img/sharp-darwin-arm64': '^0.34.2',
       '@img/sharp-darwin-x64': '^0.34.2',
       '@img/sharp-linux-arm': '^0.34.2',
