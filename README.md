@@ -17,6 +17,39 @@ npm install -g @cometix/claude-code
 3. Patches the code for Node.js compatibility (hardcoded paths, Bun-only APIs, module loading)
 4. Reassembles into a standard npm package with `vendor/` dependencies
 
+## Compatibility patches
+
+| Patch | Description |
+|-------|-------------|
+| P1 | `fileURLToPath`/`createRequire` hardcoded build paths → `__filename`/`require` |
+| P2 | `Bun.Transpiler` guard → graceful null return |
+| P3 | `/$bunfs/root/` native module requires → `vendor/` fallback |
+| P5 | `EMBEDDED_SEARCH_TOOLS` guard restored — enables Grep/Glob Tool by default; set `EMBEDDED_SEARCH_TOOLS=true` to switch to bfs/ugrep Bash shadow mode (auto-detects binary availability) |
+| P6 | Bun polyfill shim injection (global Bun API stubs) |
+| P7 | `HttpsProxyAgent` exposed on `globalThis` for Node.js ws proxy support |
+| P8 | `AF_()` shadow function patched — resolves system `bfs`/`ugrep` via `which` instead of ARGV0 multicall |
+
+## Search tools
+
+Claude Code has two search paths, controlled by the `EMBEDDED_SEARCH_TOOLS` environment variable:
+
+| Mode | Env setting | Search method | Requirements |
+|------|------------|---------------|-------------|
+| **Tool mode** (default) | unset | Grep/Glob Tool → ripgrep (bundled) | None |
+| **Shadow mode** | `=true` | Bash `find` → bfs, `grep` → ugrep | bfs + ugrep installed |
+
+In Tool mode, the model uses the built-in Grep and Glob tools powered by bundled ripgrep. In Shadow mode, `find`/`grep` commands in the Bash tool are redirected to bfs/ugrep for enhanced search.
+
+If `EMBEDDED_SEARCH_TOOLS=true` is set but bfs/ugrep are not installed, it automatically falls back to Tool mode.
+
+```bash
+# Tool mode (default, recommended)
+claude
+
+# Shadow mode (requires: brew install bfs ugrep)
+EMBEDDED_SEARCH_TOOLS=true claude
+```
+
 ## Package contents
 
 ```
