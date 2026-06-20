@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Specific version (leave empty for auto-detect)'
+        description: 'Specific upstream version (leave empty for latest missing version)'
         required: false
         type: string
       force:

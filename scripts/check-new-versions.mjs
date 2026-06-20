@@ -31,7 +31,7 @@ export async function checkNewVersions({ existing = [] } = {}) {
     } catch {}
   }
 
-  return seaVersions;
+  return seaVersions.length > 0 ? [seaVersions[seaVersions.length - 1]] : [];
 }
 
 const isMain = process.argv[1]?.endsWith('check-new-versions.mjs');
