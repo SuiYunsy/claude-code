@@ -277,9 +277,9 @@ export async function fetchAndProcess({
   await rm(tmpDir, { recursive: true, force: true });
 
   console.log(`\n✓ Done. Output in ${outputDir}/`);
-  console.log(`  main/          — @cometix/claude-code`);
+  console.log(`  main/          — @yetnpm/claude-code`);
   for (const p of activeOut) {
-    console.log(`  packages/${p}/  — @cometix/claude-code-${p}`);
+    console.log(`  packages/${p}/  — @yetnpm/claude-code-${p}`);
   }
 }
 

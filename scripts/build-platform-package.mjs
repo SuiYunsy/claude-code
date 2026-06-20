@@ -92,13 +92,13 @@ export async function buildPlatformPackage({
 
   // 5. package.json
   const pkg = {
-    name: `@cometix/claude-code-${platform}`,
+    name: `@yetnpm/claude-code-${platform}`,
     version,
     description: `Claude Code Node.js restored — ${platform}`,
     os: [os],
     cpu: [cpu],
     files: ['cli.js', 'vendor/'],
-    repository: { type: 'git', url: 'https://github.com/CometixSpace/claude-code.git' },
+    repository: { type: 'git', url: 'https://github.com/SuiYunsy/claude-code.git' },
     license: 'SEE LICENSE IN README.md',
   };
   await writeFile(join(outputDir, 'package.json'), JSON.stringify(pkg, null, 2) + '\n');

@@ -23,21 +23,21 @@ export async function buildMainPackage({
   // 1. package.json
   const optDeps = {};
   for (const p of ALL_PLATFORMS) {
-    optDeps[`@cometix/claude-code-${p}`] = version;
+    optDeps[`@yetnpm/claude-code-${p}`] = version;
   }
 
   const pkg = {
-    name: '@cometix/claude-code',
+    name: '@yetnpm/claude-code',
     version,
     bin: { claude: 'cli.js' },
     engines: { node: '>=22.0.0' },
     scripts: { postinstall: 'node install.cjs' },
-    author: 'Anthropic <support@anthropic.com>',
+    author: 'SuiYunsy <104718844+SuiYunsy@users.noreply.github.com>',
     license: 'SEE LICENSE IN README.md',
     description: 'Claude Code restored for Node.js runtime.',
-    homepage: 'https://github.com/CometixSpace/claude-code',
-    repository: { type: 'git', url: 'https://github.com/CometixSpace/claude-code.git' },
-    bugs: { url: 'https://github.com/CometixSpace/claude-code/issues' },
+    homepage: 'https://github.com/SuiYunsy/claude-code',
+    repository: { type: 'git', url: 'https://github.com/SuiYunsy/claude-code.git' },
+    bugs: { url: 'https://github.com/SuiYunsy/claude-code/issues' },
     dependencies: {
       ws: '^8.18.0',
       yaml: '^2.7.0',

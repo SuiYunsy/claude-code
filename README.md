@@ -1,4 +1,4 @@
-# @cometix/claude-code
+# @yetnpm/claude-code
 
 Claude Code restored for Node.js — extracted from official Bun SEA binaries and patched for Node.js runtime compatibility.
 
@@ -7,7 +7,7 @@ Starting from v2.1.113, Anthropic ships Claude Code as native Bun binaries inste
 ## Install
 
 ```bash
-npm install -g @cometix/claude-code
+npm install -g @yetnpm/claude-code
 ```
 
 ## What it does
@@ -63,7 +63,7 @@ vendor/
 
 ## Automated releases
 
-A GitHub Actions workflow checks for new Claude Code versions every 6 hours, builds the restored package, and publishes to both GitHub Releases and npm.
+Use the `Release` GitHub Actions workflow with `workflow_dispatch` to build a specific upstream version manually, publish GitHub release assets, and publish to npm under `@yetnpm/claude-code`.
 
 ## License
 
